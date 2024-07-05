@@ -37,8 +37,7 @@ class TcpServer:
 
         print("Starting to wait for client connections...")
         while True:
-            client_socket, client_address = self._listening_socket.accept()
-            client = Client(client_socket, client_address)
+            client = Client(*self._listening_socket.accept())
             client_thread = threading.Thread(target=self._handle_client, args=(client,))
             client_thread.start()
 
@@ -53,20 +52,21 @@ class TcpServer:
         try:
             self._receive_messages(client)
         except Exception as error:
-            print(f"Client {client} has encountered an error: {error}")
+            print(f"[!] Client {client} has encountered an error: {error}")
         finally:
-            print(f"Closing socket for client: {client}")
-            client.socket.close()
             self._remove_client(client)
 
     def _add_client(self, client: Client):
         with lock:
-            print(f"Adding client {client} to the socket list")
+            print(f"[+] Adding client {client} to the socket list")
             self._client_sockets.append(client)
 
     def _remove_client(self, client: Client):
+        print(f"[-] Closing socket for client: {client}")
+        client.socket.close()
+
         with lock:
-            print(f"Removing client {client} from the socket list")
+            print(f"[-] Removing client {client} from the socket list")
             self._client_sockets.remove(client)
 
     @staticmethod
@@ -78,7 +78,7 @@ class TcpServer:
             if data == NO_DATA:
                 print(f"Received empty data from {client}. Assuming he has disconnected...")
                 break
-            print(f"* {client} sent: {data.decode()}")
+            print(f"{client} sent: {data.decode()}")
 
 
 if __name__ == "__main__":
