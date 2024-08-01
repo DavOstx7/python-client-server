@@ -4,7 +4,7 @@ import threading
 
 HOST = "0.0.0.0"
 PORT = 8000
-BUFFER_SIZE = 1024
+DEFAULT_BUFFER_SIZE = 1024
 NO_DATA = b""
 
 lock = threading.Lock()
@@ -20,12 +20,13 @@ class Client:
 
 
 class TcpServer:
-    def __init__(self, host: str, port: int, backlog: int = 0):
+    def __init__(self, host: str, port: int, backlog: int = 0, buffer_size: int = DEFAULT_BUFFER_SIZE):
         self._host = host
         self._port = port
         self._backlog = backlog
         self._listening_socket: socket.socket = None
         self._clients: list[Client] = []
+        self.buffer_size = buffer_size
 
     @property
     def address(self) -> tuple:
@@ -69,12 +70,11 @@ class TcpServer:
             print(f"[-] Removing client {client} from the socket list")
             self._clients.remove(client)
 
-    @staticmethod
-    def _receive_messages(client: Client):
+    def _receive_messages(self, client: Client):
         print(f"Starting to receive messages from client: {client}")
 
         while True:
-            data = client.socket.recv(BUFFER_SIZE)
+            data = client.socket.recv(self.buffer_size)
             if data == NO_DATA:
                 print(f"Received empty data from {client}. Assuming he has disconnected...")
                 break
