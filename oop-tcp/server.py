@@ -25,7 +25,7 @@ class TcpServer:
         self._port = port
         self._backlog = backlog
         self._listening_socket: socket.socket = None
-        self._client_sockets: list[Client] = []
+        self._clients: list[Client] = []
 
     @property
     def address(self) -> tuple:
@@ -59,7 +59,7 @@ class TcpServer:
     def _add_client(self, client: Client):
         with lock:
             print(f"[+] Adding client {client} to the socket list")
-            self._client_sockets.append(client)
+            self._clients.append(client)
 
     def _remove_client(self, client: Client):
         print(f"[-] Closing socket for client: {client}")
@@ -67,7 +67,7 @@ class TcpServer:
 
         with lock:
             print(f"[-] Removing client {client} from the socket list")
-            self._client_sockets.remove(client)
+            self._clients.remove(client)
 
     @staticmethod
     def _receive_messages(client: Client):
