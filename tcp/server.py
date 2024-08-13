@@ -1,6 +1,5 @@
 import socket
 import threading
-import time
 
 HOST = "0.0.0.0"
 PORT = 8000
